@@ -3,9 +3,12 @@ import express from 'express';
 import cors from 'cors';
 import { SettingsManager } from './settings.js';
 import { AccountPool } from './pool.js';
+import { DatabaseManager } from './db.js';
+import { migrateFromJson } from './migrations/001_init.js';
 import { createApiRouter } from './routes/api.js';
 import { createUiRouter } from './routes/ui.js';
 import { createAdminRouter } from './routes/admin.js';
+import { createStatsRouter } from './routes/stats.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -37,13 +40,24 @@ async function startServer() {
     console.log('配置端口:', config.port);
     console.log('正在初始化服务...');
 
+    // 初始化数据库
+    const dbManager = new DatabaseManager(config);
+    await dbManager.init();
+    console.log('✓ 数据库初始化完成');
+
+    // 数据迁移
+    const migrationResult = await migrateFromJson(dbManager, config.dataDir);
+    if (!migrationResult.skipped) {
+      console.log(`✓ 数据迁移完成: ${migrationResult.migrated} 条记录`);
+    }
+
     // 初始化设置管理器
     const settingsManager = new SettingsManager(config.dataDir);
     await settingsManager.init(config.adminKey, config.apiKey);
     console.log('✓ 设置管理器初始化完成');
 
-    // 初始化账号池
-    const accountPool = new AccountPool(config);
+    // 初始化账号池（传入数据库管理器）
+    const accountPool = new AccountPool(config, dbManager);
     await accountPool.load();
     console.log('✓ 账号池初始化完成');
 
@@ -55,6 +69,7 @@ async function startServer() {
       config,
       settingsManager,
       accountPool,
+      dbManager,
       startTime
     };
 
@@ -69,8 +84,28 @@ async function startServer() {
     // 管理 API 路由 (需要 Admin Key 认证)
     app.use('/api', createAdminRouter(state));
 
+    // 统计 API 路由 (需要 Admin Key 认证)
+    app.use('/api/stats', createStatsRouter(state));
+
     // UI 路由
     app.use('/', createUiRouter(state));
+
+    // 定时清理旧日志（每天凌晨 3 点执行）
+    const scheduleLogCleanup = () => {
+      const now = new Date();
+      const next3AM = new Date(now);
+      next3AM.setHours(3, 0, 0, 0);
+      if (next3AM <= now) {
+        next3AM.setDate(next3AM.getDate() + 1);
+      }
+      const msUntil3AM = next3AM - now;
+      
+      setTimeout(() => {
+        dbManager.cleanupOldLogs(100000); // 保留最近 10 万条
+        scheduleLogCleanup(); // 递归调度下一次
+      }, msUntil3AM);
+    };
+    scheduleLogCleanup();
 
     const server = app.listen(config.port, '0.0.0.0', () => {
       console.log('========================================');

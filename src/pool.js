@@ -5,17 +5,15 @@ import { TokenManager } from './token.js';
 import { checkUsageLimits } from './usage.js';
 
 const ACCOUNTS_FILE = 'accounts.json';
-const LOGS_FILE = 'request_logs.json';
 
 export class AccountPool {
-  constructor(config) {
+  constructor(config, db = null) {
     this.config = config;
     this.accounts = new Map();
     this.tokenManagers = new Map();
     this.strategy = 'round-robin';
     this.roundRobinIndex = 0;
-    this.logs = [];
-    this.maxLogs = 1000;
+    this.db = db; // 数据库管理器（可选）
   }
 
   async load() {
@@ -33,13 +31,6 @@ export class AccountPool {
         }
         console.log(`✓ 加载了 ${accounts.length} 个账号`);
       } catch { }
-
-      // 加载日志
-      const logsPath = path.join(this.config.dataDir, LOGS_FILE);
-      try {
-        const content = await fs.readFile(logsPath, 'utf-8');
-        this.logs = JSON.parse(content).slice(-this.maxLogs);
-      } catch { }
     } catch (e) {
       console.error('加载账号池失败:', e);
     }
@@ -51,10 +42,7 @@ export class AccountPool {
     await fs.writeFile(accountsPath, JSON.stringify(accounts, null, 2));
   }
 
-  async saveLogs() {
-    const logsPath = path.join(this.config.dataDir, LOGS_FILE);
-    await fs.writeFile(logsPath, JSON.stringify(this.logs.slice(-this.maxLogs)));
-  }
+
 
   async addAccount(account, skipValidation = false) {
     const id = account.id || uuidv4();
@@ -237,20 +225,32 @@ export class AccountPool {
   }
 
   addLog(log) {
-    this.logs.push({ ...log, timestamp: new Date().toISOString() });
-    if (this.logs.length > this.maxLogs) {
-      this.logs = this.logs.slice(-this.maxLogs);
+    if (this.db) {
+      this.db.insertLog({
+        timestamp: log.timestamp || new Date().toISOString(),
+        accountId: log.accountId,
+        accountName: log.accountName,
+        model: log.model,
+        inputTokens: log.inputTokens,
+        outputTokens: log.outputTokens,
+        durationMs: log.durationMs,
+        success: log.success,
+        errorMessage: log.errorMessage
+      });
     }
-    this.saveLogs().catch(() => {});
   }
 
   getRecentLogs(n = 100) {
-    return this.logs.slice(-n).reverse();
+    if (this.db) {
+      return this.db.getRecentLogs(n);
+    }
+    return [];
   }
 
   async clearLogs() {
-    this.logs = [];
-    await this.saveLogs();
+    if (this.db) {
+      this.db.clearLogs();
+    }
   }
 
   async removeAccounts(ids) {
@@ -266,9 +266,15 @@ export class AccountPool {
   }
 
   getLogStats() {
+    if (this.db) {
+      return this.db.getLogStats();
+    }
     return {
-      totalInputTokens: this.logs.reduce((sum, l) => sum + (l.inputTokens || 0), 0),
-      totalOutputTokens: this.logs.reduce((sum, l) => sum + (l.outputTokens || 0), 0)
+      totalLogs: 0,
+      totalInputTokens: 0,
+      totalOutputTokens: 0,
+      successCount: 0,
+      failureCount: 0
     };
   }
 }

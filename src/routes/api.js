@@ -526,6 +526,17 @@ async function handleStreamResponse(res, response, toolNameMap, selected, state,
     });
 
   } catch (error) {
+    // 记录流式响应处理失败
+    state.accountPool.addLog({
+      accountId: selected.id,
+      accountName: selected.name,
+      model: model,
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: Date.now() - startTime,
+      success: false,
+      errorMessage: error.message
+    });
     res.end();
   }
 }
@@ -658,6 +669,17 @@ async function handleNonStreamResponse(res, response, toolNameMap, selected, sta
     });
 
   } catch (error) {
+    // 记录非流式响应处理失败
+    state.accountPool.addLog({
+      accountId: selected.id,
+      accountName: selected.name,
+      model: model,
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: Date.now() - startTime,
+      success: false,
+      errorMessage: error.message
+    });
     throw error;
   }
 }
