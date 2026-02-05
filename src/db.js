@@ -130,23 +130,7 @@ export class DatabaseManager {
     `);
 
     // 数据库迁移：添加新字段（如果不存在）
-    try {
-      this.db.exec(`ALTER TABLE api_keys ADD COLUMN name TEXT`);
-    } catch (e) {
-      // 列已存在，忽略错误
-    }
-
-    try {
-      this.db.exec(`ALTER TABLE request_logs ADD COLUMN api_key TEXT`);
-    } catch (e) {
-      // 列已存在，忽略错误
-    }
-
-    try {
-      this.db.exec(`ALTER TABLE request_logs ADD COLUMN stream INTEGER`);
-    } catch (e) {
-      // 列已存在，忽略错误
-    }
+    this._migrateDatabase();
 
     // 创建新索引
     this.db.exec(`
@@ -155,6 +139,30 @@ export class DatabaseManager {
     `);
 
     console.log('✓ 数据库表结构创建完成');
+  }
+
+  // 检查表中是否存在指定列
+  _columnExists(table, column) {
+    const columns = this.db.prepare(`PRAGMA table_info(${table})`).all();
+    return columns.some(col => col.name === column);
+  }
+
+  // 数据库迁移
+  _migrateDatabase() {
+    // 为 api_keys 表添加 name 字段
+    if (!this._columnExists('api_keys', 'name')) {
+      this.db.exec(`ALTER TABLE api_keys ADD COLUMN name TEXT`);
+    }
+
+    // 为 request_logs 表添加 api_key 字段
+    if (!this._columnExists('request_logs', 'api_key')) {
+      this.db.exec(`ALTER TABLE request_logs ADD COLUMN api_key TEXT`);
+    }
+
+    // 为 request_logs 表添加 stream 字段
+    if (!this._columnExists('request_logs', 'stream')) {
+      this.db.exec(`ALTER TABLE request_logs ADD COLUMN stream INTEGER`);
+    }
   }
 
   // 插入请求日志

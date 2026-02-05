@@ -110,10 +110,10 @@ export function createApiRouter(state) {
 
       if (isStream) {
         // 流式响应
-        await handleStreamResponse(res, response, toolNameMap, selected, state, startTime, req.body.model);
+        await handleStreamResponse(res, response, toolNameMap, selected, state, startTime, req.body.model, req);
       } else {
         // 非流式响应
-        await handleNonStreamResponse(res, response, toolNameMap, selected, state, startTime, req.body.model);
+        await handleNonStreamResponse(res, response, toolNameMap, selected, state, startTime, req.body.model, req);
       }
 
     } catch (error) {
@@ -123,7 +123,7 @@ export function createApiRouter(state) {
           accountId: selected.id,
           accountName: selected.name,
           model: req.body.model,
-          inputTokens: inputTokens,
+          inputTokens: 0,
           outputTokens: 0,
           durationMs: Date.now() - startTime,
           success: false,
@@ -199,7 +199,7 @@ function inferAnthropicErrorType(status) {
 /**
  * 处理流式响应 (Anthropic 格式)
  */
-async function handleStreamResponse(res, response, toolNameMap, selected, state, startTime, model) {
+async function handleStreamResponse(res, response, toolNameMap, selected, state, startTime, model, req) {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -553,7 +553,7 @@ async function handleStreamResponse(res, response, toolNameMap, selected, state,
 /**
  * 处理非流式响应 (Anthropic 格式)
  */
-async function handleNonStreamResponse(res, response, toolNameMap, selected, state, startTime, model) {
+async function handleNonStreamResponse(res, response, toolNameMap, selected, state, startTime, model, req) {
   const decoder = new EventStreamDecoder();
   let textContent = '';
   let thinkingContent = '';
