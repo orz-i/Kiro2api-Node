@@ -223,48 +223,86 @@
 
                 <!-- 设置 -->
                 <div id="tab-settings" class="p-6 tab-content hidden">
-                    <div class="max-w-2xl">
-                        <!-- API 端点信息 -->
-                        <div class="mb-8 p-4 bg-gray-50 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-3">API 端点</h3>
-                            
-                            <div class="mb-4">
-                                <p class="text-xs text-gray-500 mb-2 font-medium">Anthropic 格式</p>
-                                <div class="space-y-2 font-mono text-sm">
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">GET</span>
-                                        <span class="text-gray-700">/v1/models</span>
-                                        <button onclick="copyText(location.origin + '/v1/models')" class="text-blue-500 hover:text-blue-700 text-xs">复制</button>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">POST</span>
-                                        <span class="text-gray-700">/v1/messages</span>
-                                        <button onclick="copyText(location.origin + '/v1/messages')" class="text-blue-500 hover:text-blue-700 text-xs">复制</button>
+                    <!-- 子标签导航 -->
+                    <div class="mb-6 border-b border-gray-200">
+                        <nav class="flex space-x-8">
+                            <button onclick="switchSettingsTab('general')" id="settings-tab-general" class="settings-tab-btn py-2 px-1 border-b-2 border-blue-500 text-blue-600 font-medium text-sm">常规设置</button>
+                            <button onclick="switchSettingsTab('models')" id="settings-tab-models" class="settings-tab-btn py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">模型管理</button>
+                            <button onclick="switchSettingsTab('mappings')" id="settings-tab-mappings" class="settings-tab-btn py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">模型映射</button>
+                        </nav>
+                    </div>
+
+                    <!-- 常规设置 -->
+                    <div id="settings-content-general" class="settings-content">
+                        <div class="max-w-2xl">
+                            <!-- API 端点信息 -->
+                            <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-3">API 端点</h3>
+
+                                <div class="mb-4">
+                                    <p class="text-xs text-gray-500 mb-2 font-medium">Anthropic 格式</p>
+                                    <div class="space-y-2 font-mono text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">GET</span>
+                                            <span class="text-gray-700">/v1/models</span>
+                                            <button onclick="copyText(location.origin + '/v1/models')" class="text-blue-500 hover:text-blue-700 text-xs">复制</button>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">POST</span>
+                                            <span class="text-gray-700">/v1/messages</span>
+                                            <button onclick="copyText(location.origin + '/v1/messages')" class="text-blue-500 hover:text-blue-700 text-xs">复制</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <p class="text-xs text-gray-500 mt-3">Base URL: <span class="text-gray-700" id="baseUrl"></span></p>
-                        </div>
 
-                        <div class="mb-8">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">管理密钥</h3>
-                            <p class="text-sm text-gray-500 mb-4">用于登录管理面板</p>
-                            <div class="flex gap-3">
-                                <input type="password" id="new-admin-key" placeholder="输入新的管理密钥" class="flex-1 max-w-xs px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <button onclick="changeAdminKey()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">修改密钥</button>
+                                <p class="text-xs text-gray-500 mt-3">Base URL: <span class="text-gray-700" id="baseUrl"></span></p>
                             </div>
-                        </div>
 
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">API 密钥</h3>
-                            <p class="text-sm text-gray-500 mb-4">用于 API 调用认证，支持多个</p>
-                            <div class="flex gap-3 mb-4">
-                                <button onclick="showModal('createApiKeyModal')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">创建密钥</button>
-                                <button onclick="loadApiKeys()" class="border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 transition">刷新</button>
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">管理密钥</h3>
+                                <p class="text-sm text-gray-500 mb-4">用于登录管理面板</p>
+                                <div class="flex gap-3">
+                                    <input type="password" id="new-admin-key" placeholder="输入新的管理密钥" class="flex-1 max-w-xs px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <button onclick="changeAdminKey()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">修改密钥</button>
+                                </div>
                             </div>
-                            <div id="api-keys-list"></div>
+
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">API 密钥</h3>
+                                <p class="text-sm text-gray-500 mb-4">用于 API 调用认证，支持多个</p>
+                                <div class="flex gap-3 mb-4">
+                                    <button onclick="showModal('createApiKeyModal')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">创建密钥</button>
+                                    <button onclick="loadApiKeys()" class="border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 transition">刷新</button>
+                                </div>
+                                <div id="api-keys-list"></div>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- 模型管理 -->
+                    <div id="settings-content-models" class="settings-content hidden">
+                        <div class="mb-4 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">模型列表</h3>
+                            <div class="flex gap-2">
+                                <button onclick="showModal('addModelModal')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">添加模型</button>
+                                <button onclick="resetModels()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">重置默认</button>
+                                <button onclick="loadModels()" class="border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 transition">刷新</button>
+                            </div>
+                        </div>
+                        <div id="models-table" class="bg-white rounded-lg shadow overflow-hidden"></div>
+                    </div>
+
+                    <!-- 模型映射 -->
+                    <div id="settings-content-mappings" class="settings-content hidden">
+                        <div class="mb-4 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">映射规则</h3>
+                            <div class="flex gap-2">
+                                <button onclick="showModal('addMappingModal')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">添加映射</button>
+                                <button onclick="resetMappings()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">重置默认</button>
+                                <button onclick="loadMappings()" class="border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 transition">刷新</button>
+                            </div>
+                        </div>
+                        <div id="mappings-table" class="bg-white rounded-lg shadow overflow-hidden"></div>
                     </div>
                 </div>
             </div>
@@ -368,6 +406,125 @@
             <div class="flex justify-end gap-3 p-6 border-t border-gray-100">
                 <button onclick="hideModal('renameApiKeyModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">取消</button>
                 <button onclick="confirmRenameApiKey()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加模型弹窗 -->
+    <div id="addModelModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-scaleIn">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">添加模型</h3>
+                <button onclick="hideModal('addModelModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">模型 ID</label>
+                    <input type="text" id="model-id" placeholder="如: claude-sonnet-4-5-20250929" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">显示名称</label>
+                    <input type="text" id="model-display-name" placeholder="如: Claude Sonnet 4.5" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">最大 Token 数</label>
+                    <input type="number" id="model-max-tokens" placeholder="默认: 32000" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">显示顺序</label>
+                    <input type="number" id="model-display-order" placeholder="默认: 0" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 p-6 border-t border-gray-100">
+                <button onclick="hideModal('addModelModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">取消</button>
+                <button onclick="confirmAddModel()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑模型弹窗 -->
+    <div id="editModelModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-scaleIn">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">编辑模型</h3>
+                <button onclick="hideModal('editModelModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">模型 ID</label>
+                    <input type="text" id="edit-model-id" readonly class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">显示名称</label>
+                    <input type="text" id="edit-model-display-name" placeholder="如: Claude Sonnet 4.5" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">最大 Token 数</label>
+                    <input type="number" id="edit-model-max-tokens" placeholder="默认: 32000" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">显示顺序</label>
+                    <input type="number" id="edit-model-display-order" placeholder="默认: 0" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 p-6 border-t border-gray-100">
+                <button onclick="hideModal('editModelModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">取消</button>
+                <button onclick="confirmEditModel()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加映射弹窗 -->
+    <div id="addMappingModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-scaleIn">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">添加映射规则</h3>
+                <button onclick="hideModal('addMappingModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="text" id="mapping-pattern" placeholder="匹配模式 (如: sonnet 或正则表达式)" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="mapping-match-type" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="contains">包含匹配</option>
+                    <option value="regex">正则表达式</option>
+                </select>
+                <input type="text" id="mapping-internal-id" placeholder="内部模型 ID (如: claude-sonnet-4.5)" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="number" id="mapping-priority" placeholder="优先级 (默认: 0, 越大越优先)" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex justify-end gap-3 p-6 border-t border-gray-100">
+                <button onclick="hideModal('addMappingModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">取消</button>
+                <button onclick="confirmAddMapping()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑映射弹窗 -->
+    <div id="editMappingModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-scaleIn">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">编辑映射规则</h3>
+                <button onclick="hideModal('editMappingModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="edit-mapping-id">
+                <input type="text" id="edit-mapping-pattern" placeholder="匹配模式" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="edit-mapping-match-type" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="contains">包含匹配</option>
+                    <option value="regex">正则表达式</option>
+                </select>
+                <input type="text" id="edit-mapping-internal-id" placeholder="内部模型 ID" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="number" id="edit-mapping-priority" placeholder="优先级" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex justify-end gap-3 p-6 border-t border-gray-100">
+                <button onclick="hideModal('editMappingModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">取消</button>
+                <button onclick="confirmEditMapping()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition">保存</button>
             </div>
         </div>
     </div>
@@ -1296,6 +1453,341 @@
                     }
                 }
             });
+        }
+
+        // ============ 设置标签切换 ============
+        function switchSettingsTab(tab) {
+            // 更新标签按钮样式
+            document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.getElementById(`settings-tab-${tab}`).classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(`settings-tab-${tab}`).classList.add('border-blue-500', 'text-blue-600');
+
+            // 切换内容
+            document.querySelectorAll('.settings-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(`settings-content-${tab}`).classList.remove('hidden');
+
+            // 加载对应数据
+            if (tab === 'models') loadModels();
+            if (tab === 'mappings') loadMappings();
+        }
+
+        // ============ 模型管理 ============
+        async function loadModels() {
+            try {
+                const models = await fetchApi('/api/models');
+                const container = document.getElementById('models-table');
+
+                if (models.length === 0) {
+                    container.innerHTML = '<div class="text-center py-12 text-gray-500">暂无模型</div>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">模型 ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">显示名称</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Max Tokens</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${models.map(m => `
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900 font-mono">${m.id}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-900">${m.displayName}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">${m.maxTokens}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 text-xs rounded ${m.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                                            ${m.enabled ? '启用' : '禁用'}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm space-x-2">
+                                        <button onclick="editModel('${m.id}')" class="text-blue-600 hover:text-blue-800">编辑</button>
+                                        <button onclick="toggleModel('${m.id}')" class="text-yellow-600 hover:text-yellow-800">${m.enabled ? '禁用' : '启用'}</button>
+                                        <button onclick="deleteModel('${m.id}')" class="text-red-600 hover:text-red-800">删除</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (e) {
+                showToast('加载模型失败: ' + e.message, 'error');
+            }
+        }
+
+        async function confirmAddModel() {
+            const id = document.getElementById('model-id').value.trim();
+            const displayName = document.getElementById('model-display-name').value.trim();
+            const maxTokens = parseInt(document.getElementById('model-max-tokens').value) || 32000;
+            const displayOrder = parseInt(document.getElementById('model-display-order').value) || 0;
+
+            if (!id || !displayName) {
+                showToast('请填写必填项', 'warning');
+                return;
+            }
+
+            try {
+                await fetchApi('/api/models', {
+                    method: 'POST',
+                    body: JSON.stringify({ id, displayName, maxTokens, displayOrder })
+                });
+                hideModal('addModelModal');
+                loadModels();
+                showToast('添加成功', 'success');
+                // 清空表单
+                document.getElementById('model-id').value = '';
+                document.getElementById('model-display-name').value = '';
+                document.getElementById('model-max-tokens').value = '';
+                document.getElementById('model-display-order').value = '';
+            } catch (e) {
+                showToast('添加失败: ' + e.message, 'error');
+            }
+        }
+
+        async function editModel(id) {
+            try {
+                const models = await fetchApi('/api/models');
+                const model = models.find(m => m.id === id);
+                if (!model) return;
+
+                document.getElementById('edit-model-id').value = model.id;
+                document.getElementById('edit-model-display-name').value = model.displayName;
+                document.getElementById('edit-model-max-tokens').value = model.maxTokens;
+                document.getElementById('edit-model-display-order').value = model.displayOrder;
+                showModal('editModelModal');
+            } catch (e) {
+                showToast('加载模型失败: ' + e.message, 'error');
+            }
+        }
+
+        async function confirmEditModel() {
+            const id = document.getElementById('edit-model-id').value;
+            const displayName = document.getElementById('edit-model-display-name').value.trim();
+            const maxTokens = parseInt(document.getElementById('edit-model-max-tokens').value);
+            const displayOrder = parseInt(document.getElementById('edit-model-display-order').value);
+
+            try {
+                await fetchApi(`/api/models/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ displayName, maxTokens, displayOrder })
+                });
+                hideModal('editModelModal');
+                loadModels();
+                showToast('更新成功', 'success');
+            } catch (e) {
+                showToast('更新失败: ' + e.message, 'error');
+            }
+        }
+
+        async function deleteModel(id) {
+            if (!confirm('确定要删除此模型吗？')) return;
+            try {
+                await fetchApi(`/api/models/${id}`, { method: 'DELETE' });
+                loadModels();
+                showToast('删除成功', 'success');
+            } catch (e) {
+                showToast('删除失败: ' + e.message, 'error');
+            }
+        }
+
+        async function toggleModel(id) {
+            try {
+                await fetchApi(`/api/models/${id}/toggle`, { method: 'PATCH' });
+                loadModels();
+                showToast('状态已更新', 'success');
+            } catch (e) {
+                showToast('操作失败: ' + e.message, 'error');
+            }
+        }
+
+        async function resetModels() {
+            if (!confirm('确定要重置为默认模型列表吗？这将删除所有自定义模型。')) return;
+            try {
+                await fetchApi('/api/models/reset', { method: 'POST' });
+                loadModels();
+                showToast('已重置为默认模型', 'success');
+            } catch (e) {
+                showToast('重置失败: ' + e.message, 'error');
+            }
+        }
+
+        // ============ 模型映射管理 ============
+        async function loadMappings() {
+            try {
+                const mappings = await fetchApi('/api/model-mappings');
+                const container = document.getElementById('mappings-table');
+
+                if (mappings.length === 0) {
+                    container.innerHTML = '<div class="text-center py-12 text-gray-500">暂无映射规则</div>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">匹配模式</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">匹配类型</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">内部模型 ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">优先级</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${mappings.map(m => `
+                                <tr>
+                                    <td class="px-6 py-4 text-sm text-gray-900 font-mono">${m.externalPattern}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        <span class="px-2 py-1 text-xs rounded ${m.matchType === 'regex' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">
+                                            ${m.matchType === 'regex' ? '正则' : '包含'}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600 font-mono">${m.internalId}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">${m.priority}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 text-xs rounded ${m.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                                            ${m.enabled ? '启用' : '禁用'}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm space-x-2">
+                                        <button onclick="editMapping(${m.id})" class="text-blue-600 hover:text-blue-800">编辑</button>
+                                        <button onclick="toggleMapping(${m.id})" class="text-yellow-600 hover:text-yellow-800">${m.enabled ? '禁用' : '启用'}</button>
+                                        <button onclick="deleteMapping(${m.id})" class="text-red-600 hover:text-red-800">删除</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (e) {
+                showToast('加载映射失败: ' + e.message, 'error');
+            }
+        }
+
+        async function confirmAddMapping() {
+            const externalPattern = document.getElementById('mapping-pattern').value.trim();
+            const matchType = document.getElementById('mapping-match-type').value;
+            const internalId = document.getElementById('mapping-internal-id').value.trim();
+            const priority = parseInt(document.getElementById('mapping-priority').value) || 0;
+
+            if (!externalPattern || !internalId) {
+                showToast('请填写必填项', 'warning');
+                return;
+            }
+
+            // 验证正则表达式
+            if (matchType === 'regex') {
+                try {
+                    new RegExp(externalPattern, 'i');
+                } catch (e) {
+                    showToast('无效的正则表达式: ' + e.message, 'error');
+                    return;
+                }
+            }
+
+            try {
+                await fetchApi('/api/model-mappings', {
+                    method: 'POST',
+                    body: JSON.stringify({ externalPattern, matchType, internalId, priority })
+                });
+                hideModal('addMappingModal');
+                loadMappings();
+                showToast('添加成功', 'success');
+                // 清空表单
+                document.getElementById('mapping-pattern').value = '';
+                document.getElementById('mapping-match-type').value = 'contains';
+                document.getElementById('mapping-internal-id').value = '';
+                document.getElementById('mapping-priority').value = '';
+            } catch (e) {
+                showToast('添加失败: ' + e.message, 'error');
+            }
+        }
+
+        async function editMapping(id) {
+            try {
+                const mappings = await fetchApi('/api/model-mappings');
+                const mapping = mappings.find(m => m.id === id);
+                if (!mapping) return;
+
+                document.getElementById('edit-mapping-id').value = mapping.id;
+                document.getElementById('edit-mapping-pattern').value = mapping.externalPattern;
+                document.getElementById('edit-mapping-match-type').value = mapping.matchType;
+                document.getElementById('edit-mapping-internal-id').value = mapping.internalId;
+                document.getElementById('edit-mapping-priority').value = mapping.priority;
+                showModal('editMappingModal');
+            } catch (e) {
+                showToast('加载映射失败: ' + e.message, 'error');
+            }
+        }
+
+        async function confirmEditMapping() {
+            const id = document.getElementById('edit-mapping-id').value;
+            const externalPattern = document.getElementById('edit-mapping-pattern').value.trim();
+            const matchType = document.getElementById('edit-mapping-match-type').value;
+            const internalId = document.getElementById('edit-mapping-internal-id').value.trim();
+            const priority = parseInt(document.getElementById('edit-mapping-priority').value);
+
+            // 验证正则表达式
+            if (matchType === 'regex') {
+                try {
+                    new RegExp(externalPattern, 'i');
+                } catch (e) {
+                    showToast('无效的正则表达式: ' + e.message, 'error');
+                    return;
+                }
+            }
+
+            try {
+                await fetchApi(`/api/model-mappings/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ externalPattern, matchType, internalId, priority })
+                });
+                hideModal('editMappingModal');
+                loadMappings();
+                showToast('更新成功', 'success');
+            } catch (e) {
+                showToast('更新失败: ' + e.message, 'error');
+            }
+        }
+
+        async function deleteMapping(id) {
+            if (!confirm('确定要删除此映射规则吗？')) return;
+            try {
+                await fetchApi(`/api/model-mappings/${id}`, { method: 'DELETE' });
+                loadMappings();
+                showToast('删除成功', 'success');
+            } catch (e) {
+                showToast('删除失败: ' + e.message, 'error');
+            }
+        }
+
+        async function toggleMapping(id) {
+            try {
+                await fetchApi(`/api/model-mappings/${id}/toggle`, { method: 'PATCH' });
+                loadMappings();
+                showToast('状态已更新', 'success');
+            } catch (e) {
+                showToast('操作失败: ' + e.message, 'error');
+            }
+        }
+
+        async function resetMappings() {
+            if (!confirm('确定要重置为默认映射规则吗？这将删除所有自定义映射。')) return;
+            try {
+                await fetchApi('/api/model-mappings/reset', { method: 'POST' });
+                loadMappings();
+                showToast('已重置为默认映射', 'success');
+            } catch (e) {
+                showToast('重置失败: ' + e.message, 'error');
+            }
         }
 
         (async () => {

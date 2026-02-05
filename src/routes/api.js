@@ -53,37 +53,17 @@ export function createApiRouter(state) {
 
   // GET /v1/models
   router.get('/models', (req, res) => {
+    const models = state.dbManager.getEnabledModels();
     res.json({
       object: 'list',
-      data: [
-        { 
-          id: 'claude-sonnet-4-5-20250929', 
-          object: 'model', 
-          created: 1727568000, 
-          owned_by: 'anthropic', 
-          display_name: 'Claude Sonnet 4.5',
-          model_type: 'chat',
-          max_tokens: 32000
-        },
-        { 
-          id: 'claude-opus-4-5-20251101', 
-          object: 'model', 
-          created: 1730419200, 
-          owned_by: 'anthropic', 
-          display_name: 'Claude Opus 4.5',
-          model_type: 'chat',
-          max_tokens: 32000
-        },
-        { 
-          id: 'claude-haiku-4-5-20251001', 
-          object: 'model', 
-          created: 1727740800, 
-          owned_by: 'anthropic', 
-          display_name: 'Claude Haiku 4.5',
-          model_type: 'chat',
-          max_tokens: 32000
-        }
-      ]
+      data: models.map(m => ({
+        id: m.id,
+        object: 'model',
+        created: m.created,
+        owned_by: m.ownedBy,
+        display_name: m.displayName,
+        max_tokens: m.maxTokens
+      }))
     });
   });
 
@@ -104,7 +84,7 @@ export function createApiRouter(state) {
       }
 
       const isStream = req.body.stream === true;
-      const kiroClient = new KiroClient(state.config, selected.tokenManager);
+      const kiroClient = new KiroClient(state.config, selected.tokenManager, state.dbManager);
       upstreamModel = kiroClient.mapModel(req.body.model);
 
       // 调用 Kiro API

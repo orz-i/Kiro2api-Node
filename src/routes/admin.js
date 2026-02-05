@@ -279,5 +279,170 @@ export function createAdminRouter(state) {
     res.json({ success: updated, error: updated ? null : '密钥不存在' });
   });
 
+  // ============ 模型管理 API ============
+
+  // GET /api/models - 获取所有模型
+  router.get('/models', (req, res) => {
+    const models = state.dbManager.getAllModels();
+    res.json(models);
+  });
+
+  // POST /api/models - 添加模型
+  router.post('/models', (req, res) => {
+    try {
+      const { id, displayName, maxTokens, created, ownedBy, enabled, displayOrder } = req.body;
+
+      if (!id || !displayName) {
+        return res.status(400).json({ error: 'id 和 displayName 为必填项' });
+      }
+
+      // 检查是否已存在
+      const existing = state.dbManager.getModelById(id);
+      if (existing) {
+        return res.status(409).json({ error: '模型 ID 已存在' });
+      }
+
+      state.dbManager.addModel({
+        id,
+        displayName,
+        maxTokens: maxTokens || 32000,
+        created: created || 1727568000,
+        ownedBy: ownedBy || 'anthropic',
+        enabled: enabled !== undefined ? enabled : true,
+        displayOrder: displayOrder || 0
+      });
+
+      res.status(201).json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // PUT /api/models/:id - 更新模型
+  router.put('/models/:id', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { displayName, maxTokens, created, ownedBy, enabled, displayOrder } = req.body;
+
+      const updates = {};
+      if (displayName !== undefined) updates.displayName = displayName;
+      if (maxTokens !== undefined) updates.maxTokens = maxTokens;
+      if (created !== undefined) updates.created = created;
+      if (ownedBy !== undefined) updates.ownedBy = ownedBy;
+      if (enabled !== undefined) updates.enabled = enabled;
+      if (displayOrder !== undefined) updates.displayOrder = displayOrder;
+
+      state.dbManager.updateModel(id, updates);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // DELETE /api/models/:id - 删除模型
+  router.delete('/models/:id', (req, res) => {
+    const deleted = state.dbManager.deleteModel(req.params.id);
+    res.status(deleted ? 204 : 404).end();
+  });
+
+  // PATCH /api/models/:id/toggle - 切换启用状态
+  router.patch('/models/:id/toggle', (req, res) => {
+    const success = state.dbManager.toggleModelEnabled(req.params.id);
+    res.json({ success });
+  });
+
+  // POST /api/models/reset - 重置默认模型
+  router.post('/models/reset', (req, res) => {
+    state.dbManager.resetDefaultModels();
+    res.json({ success: true });
+  });
+
+  // ============ 模型映射管理 API ============
+
+  // GET /api/model-mappings - 获取所有映射
+  router.get('/model-mappings', (req, res) => {
+    const mappings = state.dbManager.getAllModelMappings();
+    res.json(mappings);
+  });
+
+  // POST /api/model-mappings - 添加映射
+  router.post('/model-mappings', (req, res) => {
+    try {
+      const { externalPattern, internalId, matchType, priority, enabled } = req.body;
+
+      if (!externalPattern || !internalId) {
+        return res.status(400).json({ error: 'externalPattern 和 internalId 为必填项' });
+      }
+
+      // 验证正则表达式
+      if (matchType === 'regex') {
+        try {
+          new RegExp(externalPattern, 'i');
+        } catch (error) {
+          return res.status(400).json({ error: '无效的正则表达式: ' + error.message });
+        }
+      }
+
+      state.dbManager.addModelMapping({
+        externalPattern,
+        internalId,
+        matchType: matchType || 'contains',
+        priority: priority || 0,
+        enabled: enabled !== undefined ? enabled : true
+      });
+
+      res.status(201).json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // PUT /api/model-mappings/:id - 更新映射
+  router.put('/model-mappings/:id', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { externalPattern, internalId, matchType, priority, enabled } = req.body;
+
+      // 如果修改了正则表达式，需要验证
+      if (matchType === 'regex' && externalPattern !== undefined) {
+        try {
+          new RegExp(externalPattern, 'i');
+        } catch (error) {
+          return res.status(400).json({ error: '无效的正则表达式: ' + error.message });
+        }
+      }
+
+      const updates = {};
+      if (externalPattern !== undefined) updates.externalPattern = externalPattern;
+      if (internalId !== undefined) updates.internalId = internalId;
+      if (matchType !== undefined) updates.matchType = matchType;
+      if (priority !== undefined) updates.priority = priority;
+      if (enabled !== undefined) updates.enabled = enabled;
+
+      state.dbManager.updateModelMapping(id, updates);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // DELETE /api/model-mappings/:id - 删除映射
+  router.delete('/model-mappings/:id', (req, res) => {
+    const deleted = state.dbManager.deleteModelMapping(req.params.id);
+    res.status(deleted ? 204 : 404).end();
+  });
+
+  // PATCH /api/model-mappings/:id/toggle - 切换启用状态
+  router.patch('/model-mappings/:id/toggle', (req, res) => {
+    const success = state.dbManager.toggleModelMappingEnabled(req.params.id);
+    res.json({ success });
+  });
+
+  // POST /api/model-mappings/reset - 重置默认映射
+  router.post('/model-mappings/reset', (req, res) => {
+    state.dbManager.resetDefaultModelMappings();
+    res.json({ success: true });
+  });
+
   return router;
 }
